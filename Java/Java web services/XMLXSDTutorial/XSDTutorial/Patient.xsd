@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+	targetNamespace="http://www.vrushank.com/Patient"
+	xmlns:tns="http://www.vrushank.com/Patient"
+	elementFormDefault="qualified">
+	
+	<element name="patient" type="tns:Patient" />
+	
+	<complexType name="Patient">
+		<!-- sequence means all the data in that should be occur in the given order only. maintained order is mandatory. -->
+		<sequence>  			
+			<element name="name" type="tns:String15Chars" minOccurs="0" maxOccurs="2"/> <!-- not necessary to write but maximum 2 times only. -->
+			<element name="age" type="int"/>
+			<element name="dob" type="date"/>
+			<element name="email" type="string" maxOccurs="unbounded"/> <!-- any number of occurences of email -->
+			<element name="gender" type="tns:Gender"/>
+			<element name="payment" type="tns:PaymentType"/>
+		</sequence>
+		<attribute name="id" type="tns:ID" />  <!--  this is an attribute, so we've to use it in the root element in xml -->
+	</complexType>
+
+	<complexType name="PaymentType">
+		<choice> <!-- Choice means any one of the given params should be occur. -->
+			<element name="cash" type="int"/>
+			<element name="insurance" type="tns:Insurance"/>
+		</choice>
+	</complexType>	
+	
+	<complexType name="Insurance">
+		<all> <!-- All means all the elements should occur, but in any order, that doesn't matter. -->
+			<element name="provider" type="string"/>
+			<element name="limit" type="int"/>
+		</all>
+	</complexType>
+	
+	<simpleType name="ID">
+		<restriction base="int">
+			<pattern value="[0-9]*"></pattern>
+		</restriction>
+	</simpleType>
+	
+	<simpleType name="String15Chars">
+		<restriction base="string">
+			<maxLength value="15"></maxLength>
+		</restriction>
+	</simpleType>
+	
+	<simpleType name="Gender">
+		<restriction base="string">
+			<enumeration value="M"/>
+			<enumeration value="F"/>
+		</restriction>
+	</simpleType>
+</schema>

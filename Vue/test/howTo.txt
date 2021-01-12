@@ -1,0 +1,6 @@
+run these commands to use vue ui.
+* npm install -g @vue/cli
+* vue ui
+
+to build
+* npm build

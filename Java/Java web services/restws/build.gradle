@@ -1,0 +1,26 @@
+plugins {
+	id 'org.springframework.boot' version '2.3.1.RELEASE'
+	id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+	id 'java'
+}
+
+group = 'com.vrushank'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '1.8'
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter'
+	testImplementation('org.springframework.boot:spring-boot-starter-test') {
+		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+	}
+	compile group: 'org.apache.cxf', name: 'cxf-spring-boot-starter-jaxrs', version: '3.3.7'
+	compile group: 'org.hibernate', name: 'hibernate-validator', version: '6.1.5.Final'
+}
+
+test {
+	useJUnitPlatform()
+}

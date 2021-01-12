@@ -1,0 +1,14 @@
+HAL browser can be used for REST testing, spring boot provides it directly, just we've to add the dependency.
+Spring boot actuator can be used to discover all the services or a URLs where all the resources live.
+The only thing we did in this project is added the dependency of spring boot actualtor and HAL browser,
+simply run this application after adding dependencies,
+open the URL of actuator as : localhost:8080
+open the URL of HAL browser : http://localhost:8080/browser/index.html#/
+
+if you want the actuator to discover all the services and URLs, then add below line to application.properties
+management.endpoints.web.exposure.include=*
+
+One more new dependency is spring boot devtools, which allows the developer to run the application with hot reload.
+So from now on, if user apply changes in any file of the project, then developer doesn't need to restart the project,
+insted, the project will reexecute automatically and the changes will be live easily.
+for using devtools, just add the dependency as spring-boot-devtools.

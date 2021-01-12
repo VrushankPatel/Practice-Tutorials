@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tns:patient xmlns:tns="http://www.vrushank.com/Patient" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.vrushank.com/Patient Patient.xsd ">
+  <tns:age>0</tns:age>
+  <tns:dob>2001-01-01</tns:dob>
+  <tns:email>tns:email</tns:email>
+  <tns:gender>M</tns:gender>
+  <tns:payment>
+    <tns:cash>0</tns:cash>
+  </tns:payment>
+</tns:patient>

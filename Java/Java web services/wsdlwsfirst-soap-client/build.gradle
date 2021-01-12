@@ -1,0 +1,68 @@
+buildscript {
+	dependencies {
+		classpath "commons-io:commons-io:2.4"
+	}
+}
+
+plugins {
+	id 'org.springframework.boot' version '2.3.1.RELEASE'
+	id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+	id 'java'
+}
+
+group = 'com.vrushank'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '1.8'
+
+repositories {
+	mavenCentral()
+}
+
+configurations {
+	java2wsdl
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter'
+	testImplementation('org.springframework.boot:spring-boot-starter-test') {
+		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+	}
+	compile group: 'org.hibernate', name: 'hibernate-validator', version: '6.1.5.Final'
+	compile group: 'org.apache.cxf', name: 'cxf-spring-boot-starter-jaxws', version: '3.3.7'
+	java2wsdl "org.apache.cxf:cxf-tools-wsdlto-core:2.7.0"
+	java2wsdl "org.apache.cxf:cxf-tools-wsdlto-frontend-jaxws:2.7.0"
+	java2wsdl "org.apache.cxf:cxf-tools-wsdlto-databinding-jaxb:2.7.0"
+}
+
+/*test {
+	useJUnitPlatform()
+}*/
+
+def java2wsdl = task generateJavaFromWsdl(type: JavaExec) {
+	def wsdl = file('src/main/resources/wsdl/CustomerOrdersSoapClient.wsdl')
+	def genSrcDir = file("${rootDir}/src/main/java")
+
+	inputs.file  wsdl
+	outputs.dir genSrcDir
+
+	classpath configurations.java2wsdl
+	main "org.apache.cxf.tools.wsdlto.WSDLToJava"
+
+	args '-d', genSrcDir.toString(), wsdl.toString()
+
+	def byteArrayOutputStream = new org.apache.commons.io.output.ByteArrayOutputStream()
+	errorOutput = new org.apache.commons.io.output.TeeOutputStream(System.err, byteArrayOutputStream)
+	doLast {
+		def str = byteArrayOutputStream.toString()
+		if (str.contains('Usage : wsdl2java') || str.contains('WSDLToJava Error')) {
+			throw new TaskExecutionException(
+					tasks[name],
+					new IOException("WSDLToJava has failed. Please see output")
+			)
+		}
+	}
+}
+compileJava.dependsOn += java2wsdl
+compileJava.source java2wsdl.outputs.files, sourceSets.main.java
+

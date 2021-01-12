@@ -1,0 +1,24 @@
+ First of all read the nginx.conf and server.js carefully.
+ Now, open two cmds or Terminals and bring their path to this folder.
+ Now for windows run below command..
+    Command prompt 1
+    >>> set PORT=3000 && node server.js
+
+    Command prompt 2
+    >>> set PORT=3001 && node server.js
+
+For Linux, run below command
+    Terminal 1
+    >>> PORT=3000 node server.js
+
+    Terminal 2
+    >>> PORT=3001 node server.js
+
+Now, server.js is running on two different ports 3000 and 3001, if you've checked the nginx.conf, then you'll understand that how we're going to distribute the load here.
+We'll use weighted round robin strategy for load balancing here, we'll keep weight of 3 for port 3000, and 1 or normal for 3001.
+So more requests will go to 3000.
+Now get nginx or install it, and copy and replace this nginx.conf to your nginx, restart the server and open localhost:8080/hello.
+You'll see Hello from port 3000.
+Keep reloading the page again and again, and you'll see that in every 4 requests, one is going to 3001.
+
+This is simple load balancing example.

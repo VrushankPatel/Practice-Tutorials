@@ -1,0 +1,271 @@
+# getting cluster health
+GET /_cluster/health
+
+# getting nodes of the cluster
+GET /_cat/nodes?v
+
+# getting indices of the cluster
+GET /_cat/indices
+
+# creating new index named pages
+PUT /pages
+
+# getting indices of the cluster to check pages
+GET /_cat/indices
+
+# getting cluster health, now we'll get yellow as a status.
+GET /_cluster/health
+
+# getting indices of the cluster, and we'll get yellow as status of pages index
+# because the pages index status is yellow, it'll show us entire cluster status as yellow.
+GET /_cat/indices?v
+# the reason why we're getting the yellow state is, in this above query result, we can see the pages in the indices, and it's default rep is 1, rep means replica, so, to make the replica shard(clone) of this index, the ES doesn't store the replica in the same node of primary shard, it require another node, which we haven't created so, if there is any data loss, we'll not be able to recover it from replica shard since it is not able to created due to lake of nodes, that is why it is showing the yellow state(Warning).
+
+# Let's list all the shards in our cluster.
+GET /_cat/shards?v 
+# as we can see for above query, we're getting pages's replica is Unassigned because of unavailability of nodes. prirep column shows primary(p) or replica shard(r)
+
+# let's take a look at kibana's replicas and shards.
+GET /_cat/indices?v
+# as you can see for above query, kibana instance has zero replica because it stores very small amount of data, but don't get fooled with this zeros in replicas column, kibana indices are configured with a setting named auto_expand_replicas with value range from 0 to 1 so as of now, we've 1 node, so it's replicas are zero, when we'll have more then one node, it'll increase it's replica value to 1.
+
+# So, we've to create a new node so, follow the instructions below to create new node.
+# Download the elastic search again and unzip it, inside it's config directory, start editing the file named elasticsearch.yml, in there, uncomment the node.name line and change it to node.name:node-2.
+# run the elastic search from that instance also, and that's it, the new node is added to existing elasticsearch server.
+# Queries after this will be based on 2 nodes, 1 initial and 1 we just created.
+
+# let's check the cluster's health
+GET /_cluster/health
+# the cluster's health should be green by now. but if the kibana's shrad's health is yellow, then cluster's health can be yellow too.
+
+# by below command, we can see our "pages" index with it's replica has started.
+GET /_cat/shards?v
+
+# in below command, we can see that which shrad is in yellow status.
+# but in this query, out 'pages' index is started so, it'll be in green status
+# also, we can notice that, our kibana's replicas are created when we provided one more node to cluster.
+GET /_cat/indices?v
+
+# before this, we created new node by downloading and executing new elasticsearch instance. however, there is another way to create new node, but this way is recommended for development purpose only, not in production env. for this, just bring the cmd path to elastic search's root directory, then we'll run the elastic search with some arguments, that can override some properties of elasticsearch.yml file and run new instance of elasticsearch as a new node.
+# So here, we've 2 nodes running, we want to add 3rd node, then for that, run cmd and change directory to elasticsearch's root directory. now run the below command.
+
+# >> bin\elasticsearch -Enode.name=node-3 -Epath.data=./node-3/data -Epath.logs=./node-3/logs
+
+# in above command, don't forget to change the values based on your node.
+# and now, we've successfully added 3rd node to our cluster.
+
+# let's delete the pages index we just created
+DELETE /pages
+
+# let's add new index products with our customized replicas and shards
+PUT /products
+{
+  "settings": {
+    "number_of_shards": 2,
+    "number_of_replicas": 2
+  }
+}
+
+GET /_cat/indices
+
+# let's add some documents in this index
+# we'll use POST to add new document
+POST /products/_doc
+{
+  "name": "Coffe Maker",
+  "price" : 64,
+  "in_stock" : 10
+}
+# in above query, you can see that the document will be created with auto generated id.
+# also, it contains the shards object, which shows that how many replica shards are stored successfully and how many are failed.
+# also, in this case, total shards shown is 3, that means that initial record in primary shard is 1 shard, and 2 replicas that we declared earlier for this index will be stored to another nodes. So, total 3 replica shards.
+
+# let's add new document with our own id 100.
+# now, we'll use PUT.
+# POST :used to achieve auto-generation of ids. PUT :used when you want to specify an id.
+PUT /products/_doc/100
+{
+  "name": "Toaster",
+  "price" : 32,
+  "in_stock" : 3
+}
+
+# let's retrieve the data by Id.
+# Here, we've to use GET
+GET /products/_doc/100
+# in the result of above query, we can see our data in _sourse JSON object, and found=true.
+
+# let's try to retrieve something which doesn't exists
+GET /products/_doc/10
+# it'll show fount=false
+
+# let's update the existing document by it's id
+# here we'll use POST and we've to pass only parameters those are needed to be updated, rest of the parameters can be avoided here.
+POST /products/_update/100
+{
+  "doc" : {
+    "in_stock" : 23
+  }
+}
+# the result key of above query's output will show updated.
+# if everything would have remained the same as before's data (means that we passed same value to update for in_stock which was same before) then the result key should have shown noop insted of updated.
+
+# let's retrieve that product to verify that is updated.
+GET /products/_doc/100
+
+# let's add the new field in the document where id is 100
+POST /products/_update/100
+{
+  "doc" : {
+    "Tag" : ["Electronics"]
+  }
+}
+
+
+# let's retrieve the doc to verify new field is added.
+GET /products/_doc/100
+
+# documents updating in Elasticsearch is very easy.
+# It might surprise you that ElasticSearch Documents are immutable😲.
+# but, didn't we just changed the document,
+# No, we didn't, actually the Update API replaced the document, when we try to update the document, internally it replace the document with new data, making i look like we updated the documents.
+# The Update API is simpler and saves some network traffic, it retrives the document, update a field temporary, and then replace the existing document with new doc.
+# Actually, we can do the same thing manually, but Update API save us from doing some additional steps or work.
+# Also, the Update API is efficient, because it limits the number of network round trip that are required.
+
+# Now, let's say we want to decrement of in_stock for the product where id is 100. So, we've to retrieve the product, know the current value and then have to update the document with it's decremented value.
+# Task is to decrement in_stock value without knowing it's current value (Like in_stock-- in programming).
+# ElasticSearch supports thescripting and scripted updates which can do this very easily for us.
+POST /products/_update/100
+{
+  "script": {
+    "source": "ctx._source.in_stock--"
+  }
+}
+# after running above query, the document will be updated sith decremented value of in_stock where id = 100.
+# in above query, ctx means context, we'll access source of the document by ctx, and we'll decrement the variable.
+# similarly, we can increment also (assignment).
+# Now, check the current document data of product to verify that in_stock is decremented or not.
+
+# similarly, we can apply any math operation to in_stock by scripting of ELASTICSEARCH.
+# Here are some examples
+
+# assigning the value
+POST /products/_update/100
+{
+  "script": {
+    "source": "ctx._source.in_stock = 10"
+  }
+}
+
+#check
+GET /products/_doc/100
+
+# incrementing by 4
+POST /products/_update/100
+{
+  "script": {
+    "source": "ctx._source.in_stock += 4"
+  }
+}
+
+#check
+GET /products/_doc/100
+
+# assigning the value of price to in_stock
+POST /products/_update/100
+{
+  "script": {
+    "source": "ctx._source.in_stock = ctx._source.price"
+  }
+}
+
+#check
+GET /products/_doc/100
+
+# creating params object and using it to modify data
+POST /products/_update/100
+{
+  "script": {
+    "source": "ctx._source.in_stock = params.new_quantity",
+    "params": {
+      "new_quantity": 127
+    }
+  }
+}
+
+#check
+GET /products/_doc/100
+
+# in the output of Update API, the result key may contain noop, if you try to assign the same value which was before.
+
+# here is a script, which will
+# decrement the in_stock's value if it's value is not greater or equal to 128.
+# if the in_stock's value is >= 128, then ctx.op = "noop" statement will not let script to perform any activity, so the result will be set to noop, and the rest of the statements will be ignored.
+POST /products/_update/100
+{
+  "script": {
+    "source": """
+      if(ctx._source.in_stock >= 128){
+        ctx.op = 'noop';
+      }
+      ctx._source.in_stock--;
+    """
+  }
+}
+# if we want to show the operation as some other activity, then in above query, statement ctx.op can be changed accordingly like (ctx.op='DELETE').
+# we can use else statement with if (try it on your own).
+
+#check
+GET /products/_doc/100
+
+# another way of updating documents is upsert.
+# what if there is no document exists with id 101.
+# try below query
+POST /products/_update/101
+{
+  "script": {
+    "source": "ctx._source.in_stock++"
+  },
+  "upsert": {
+    "name" : "Blender",
+    "price" : 100,
+    "in_stock" : 17,
+    "Tag" : [
+      "Electronics"
+    ]
+  }
+}
+# in above query, if the product with id 101 exists, it'll increment the in_stock for that product and upsert block will be ignored, but if product with id 101 doesn't exist, then script block will ignored, and new product with 101 will be created with the data written in upsert block.
+
+#check
+GET /products/_doc/101
+
+# Now try to run the above upsert query again, this time product 101 exists, so it'll increment the in_stock of product from 17 to 18.
+
+# let's replace the product with Id 100 to some other data, here, we're going to replace the document, so whole document data will be deleted and new data will be isnerted, we can do it simply as we created the document by PUT, check below query.
+PUT /products/_doc/100
+{
+  "name" : "Replaced Toaster",
+  "price" : 79,
+  "in_stock" : 4
+}
+
+#check
+GET /products/_doc/100
+# while checking, we can see that the tags field is deleted because we replaced whole document.
+
+# let's delete the product with id 101.
+DELETE /products/_doc/101
+
+#check
+GET /products/_doc/101
+# it should give found=false
+
+# check the version field for product 100
+GET /products/_doc/100
+# in here, we can see that elastic search keep the version of document, every time we apply changes in document, this version will be incremented.
+# ES keep only the latest version of document, so versioning doesn't mean that we can retrieve any other version of document.
+# in ES, there are two types of version, one is the internal versioning which we just saw, and other one is external versioning, which apply when we use oter database services with elastic search to store the data.
+
+
