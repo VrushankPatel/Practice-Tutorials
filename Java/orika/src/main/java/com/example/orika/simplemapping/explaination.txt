@@ -1,0 +1,2 @@
+In this package, our task is to map the simple source class to destination class.
+Here, both classes have same variables.

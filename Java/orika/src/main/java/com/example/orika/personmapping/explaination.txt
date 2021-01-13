@@ -1,0 +1,3 @@
+In this package, our task is to map the Person class to Personne class.
+Here, both classes have similar variables, but their names are different.
+Orika can not map the classes directly, we have to tell it which variables and how they should be mapped.
