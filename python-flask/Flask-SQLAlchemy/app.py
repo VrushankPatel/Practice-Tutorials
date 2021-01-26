@@ -1,13 +1,18 @@
 from datetime import datetime
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from flask_admin import Admin
+from flask_admin.contrib.sqla import ModelView
 
 app = Flask(__name__)
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite3'
+app.config['SECRET_KEY'] = 'mysecret'
 
 db = SQLAlchemy(app)
+
+admin = Admin(app)
 
 
 class User(db.Model):
@@ -15,6 +20,9 @@ class User(db.Model):
     name = db.Column(db.String(50))
     location = db.Column(db.String(50))
     date_created = db.Column(db.DateTime, default=datetime.now())
+
+
+admin.add_view(ModelView(User, db.session))
 
 
 @app.route("/<name>/<location>", methods=['POST'])

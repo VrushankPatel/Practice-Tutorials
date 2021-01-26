@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<wsdl:definitions xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="http://cartorder.ws.vrushank.com/"
+                  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:ns1="http://schemas.xmlsoap.org/soap/http"
+                  name="CustomerOrdersService" targetNamespace="http://cartorder.ws.vrushank.com/">
+    <wsdl:types>
+        <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+                   xmlns:tns="http://cartorder.ws.vrushank.com/" elementFormDefault="unqualified"
+                   targetNamespace="http://cartorder.ws.vrushank.com/" version="1.0">
+
+            <xs:complexType name="cartOrder">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="cartId" type="xs:integer" />
+                    <xs:element minOccurs="0" name="itemName" type="xs:string" />
+                    <xs:element minOccurs="0" name="numberOfItems" type="xs:integer" />
+                </xs:sequence>
+            </xs:complexType>
+        </xs:schema>
+    </wsdl:types>
+</wsdl:definitions>

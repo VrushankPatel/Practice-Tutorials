@@ -1,0 +1,21 @@
+1) Generated Gradle Spring Boot project files from start.spring.io and open it in intelliJ IDEA, also import it as a gradle project.
+
+2) copied the wsdl file from source to src/main/resources/wsdl folder.
+
+3) added some dependencies and cxf gradle plugin configuration related to in which directory to put the wsdl generated webservices, interfaces and classes.
+
+4) run the gradle clean and then gradle build.
+
+5) Create the WebService by creating CustomerOrderWsImpl.java class  which implements the CustomerOrdersPortType interface from generated classes and interfaces.
+
+6) We'll not mark the CustomerOrderWsImpl class with any annotation because the interface which we're implementing is marked with all the required annotation for webservices.
+   Also, check the comments written in the class to understand how it is written and works..
+
+7) Now, we just created the webservice, but to access it, we've to publish it so, for that, we'll create the WebServiceConfig.java class which is web service configuration class. (Check the comments in that class.
+
+8) Now, run the project as a spring boot application.
+
+9) to consume this web service, we'll create wsdlwsfirst-soap-client project.
+
+
+

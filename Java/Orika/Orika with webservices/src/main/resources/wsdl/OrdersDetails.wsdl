@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<wsdl:definitions xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="http://orderdetails.ws.vrushank.com/"
+                  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:ns1="http://schemas.xmlsoap.org/soap/http"
+                  name="CustomerOrdersService" targetNamespace="http://orderdetails.ws.vrushank.com/">
+    <wsdl:types>
+        <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+                   xmlns:tns="http://orderdetails.ws.vrushank.com/" elementFormDefault="unqualified"
+                   targetNamespace="http://orderdetails.ws.vrushank.com/" version="1.0">
+
+            <xs:complexType name="orderDetails">
+                <xs:sequence>
+                    <xs:element minOccurs="0" name="orderId" type="xs:integer" />
+                    <xs:element minOccurs="0" name="productName" type="xs:string" />
+                    <xs:element minOccurs="0" name="quantity" type="xs:integer" />
+                </xs:sequence>
+            </xs:complexType>
+        </xs:schema>
+    </wsdl:types>
+</wsdl:definitions>
